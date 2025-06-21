@@ -14,16 +14,111 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Project {
+    id          String   @id @default(cuid())
+    name        String
+    description String?
+    color       String?  @default("#3B82F6")
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
     createdBy   User   @relation(fields: [createdById], references: [id])
     createdById String
 
+    members ProjectMember[]
+    tasks   Task[]
+
     @@index([name])
+}
+
+model ProjectMember {
+    id        String      @id @default(cuid())
+    role      ProjectRole @default(MEMBER)
+    joinedAt  DateTime    @default(now())
+
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId String
+
+    @@unique([userId, projectId])
+}
+
+model Task {
+    id          String     @id @default(cuid())
+    title       String
+    description String?
+    status      TaskStatus @default(TODO)
+    priority    Priority   @default(MEDIUM)
+    dueDate     DateTime?
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+
+    createdBy   User    @relation("TaskCreatedBy", fields: [createdById], references: [id])
+    createdById String
+    assignedTo  User?   @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+    assignedToId String?
+    project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId   String
+
+    tags TaskTag[]
+    comments TaskComment[]
+
+    @@index([status])
+    @@index([priority])
+    @@index([dueDate])
+    @@index([assignedToId])
+}
+
+model Tag {
+    id    String @id @default(cuid())
+    name  String @unique
+    color String @default("#6B7280")
+
+    tasks TaskTag[]
+}
+
+model TaskTag {
+    task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId String
+    tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+    tagId  String
+
+    @@id([taskId, tagId])
+}
+
+model TaskComment {
+    id        String   @id @default(cuid())
+    content   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    authorId String
+    task     Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId   String
+
+    @@index([taskId])
+}
+
+enum ProjectRole {
+    OWNER
+    ADMIN
+    MEMBER
+}
+
+enum TaskStatus {
+    TODO
+    IN_PROGRESS
+    IN_REVIEW
+    DONE
+}
+
+enum Priority {
+    LOW
+    MEDIUM
+    HIGH
+    URGENT
 }
 
 // Necessary for Next auth
@@ -60,9 +155,20 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    bio           String?
+    role          String?
+    department    String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+
+    // Project relationships
+    createdProjects   Project[]
+    projectMemberships ProjectMember[]
+
+    // Task relationships
+    createdTasks  Task[] @relation("TaskCreatedBy")
+    assignedTasks Task[] @relation("TaskAssignedTo")
+    comments      TaskComment[]
 }
 
 model VerificationToken {

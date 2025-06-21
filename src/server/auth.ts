@@ -1,14 +1,11 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
-import { env } from "~/env";
 import { db } from "~/server/db";
 
 /**
@@ -38,30 +35,93 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  debug: true, // Add debug mode
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login', // Error code passed in query string as ?error=
+  },
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
+        id: token.sub!,
       },
     }),
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
   },
-  adapter: PrismaAdapter(db) as Adapter,
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials, req) {
+        console.log('🔥 AUTHORIZE FUNCTION CALLED!');
+        console.log('Authorize function called with credentials:', { 
+          email: credentials?.email, 
+          passwordLength: credentials?.password?.length 
+        });
+        console.log('Request object:', req ? 'Present' : 'Not present');
+        
+        if (!credentials?.email || !credentials?.password) {
+          console.log('Missing email or password');
+          return null;
+        }
+
+        try {
+          // Find user in local database
+          const user = await db.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
+
+          console.log('Database query result:', user ? 'User found' : 'User not found');
+
+          if (!user) {
+            console.log("User not found:", credentials.email);
+            return null;
+          }
+
+          // Check if user has a stored password hash (in the role field)
+          if (!user.role) {
+            console.log("No password hash found for user:", credentials.email);
+            return null;
+          }
+
+          // Verify password using bcrypt
+          const bcrypt = await import('bcryptjs');
+          const isValidPassword = await bcrypt.compare(credentials.password, user.role as string);
+          
+          console.log('Password validation result:', isValidPassword);
+          
+          if (isValidPassword) {
+            console.log('Password match! Returning user:', { id: user.id, email: user.email, name: user.name });
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+            };
+          }
+
+          console.log("Invalid password for user:", credentials.email);
+          return null;
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
+        }
+      }
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
 };
 
