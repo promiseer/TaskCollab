@@ -1,5 +1,7 @@
 # TaskCollab - Simple Task Management and Collaboration Tool
 
+![TaskCollab](./public/image.png)
+
 A full-stack task management application built with the T3 stack (Next.js, TypeScript, tRPC, Prisma, NextAuth.js, and Tailwind CSS). This project demonstrates modern web development practices and provides a complete solution for team collaboration and project management.
 
 ## 🚀 Features
