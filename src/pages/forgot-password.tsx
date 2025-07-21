@@ -24,7 +24,7 @@ export default function ForgotPassword() {
       } else {
         setMessage('Check your email for a password reset link!');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

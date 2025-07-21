@@ -3,8 +3,9 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import { cn, getInitials } from "~/utils/helpers";
+import { getInitials } from "~/utils/helpers";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: false },
@@ -63,10 +64,12 @@ export default function Navbar() {
                       <span className="absolute -inset-1.5" />
                       <span className="sr-only">Open user menu</span>
                       {session?.user?.image ? (
-                        <img
+                        <Image
                           className="h-8 w-8 rounded-full"
                           src={session.user.image}
                           alt=""
+                          width={32}
+                          height={32}
                         />
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
@@ -153,10 +156,12 @@ export default function Navbar() {
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   {session?.user?.image ? (
-                    <img
+                    <Image
                       className="h-10 w-10 rounded-full"
                       src={session.user.image}
                       alt=""
+                      width={40}
+                      height={40}
                     />
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">

@@ -17,7 +17,7 @@ const NewProject: NextPage = () => {
 
   const createProject = api.project.create.useMutation({
     onSuccess: (project) => {
-      router.push(`/projects/${project.id}`);
+      void router.push(`/projects/${project.id}`);
     },
     onError: (error) => {
       setErrors({ general: error.message });
@@ -168,10 +168,10 @@ const NewProject: NextPage = () => {
               </Link>
               <button
                 type="submit"
-                disabled={createProject.isLoading}
+                disabled={createProject.isPending}
                 className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {createProject.isLoading ? "Creating..." : "Create Project"}
+                {createProject.isPending ? "Creating..." : "Create Project"}
               </button>
             </div>
           </form>

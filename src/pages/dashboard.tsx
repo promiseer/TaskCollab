@@ -17,20 +17,19 @@ const Dashboard: NextPage = () => {
   const { data: projects, isLoading: projectsLoading } = api.project.getAll.useQuery();
   const { data: tasks, isLoading: tasksLoading } = api.task.getAll.useQuery({});
   const { data: stats } = api.task.getStats.useQuery({});
-  const { data: myTasks } = api.task.getAll.useQuery({ assignedToMe: true });
 
-  const recentTasks = tasks?.slice(0, 5) || [];
+  const recentTasks = tasks?.slice(0, 5) ?? [];
   const upcomingTasks = tasks?.filter(task => 
     task.dueDate && 
     !isOverdue(task.dueDate) && 
     task.status !== "DONE"
-  ).slice(0, 5) || [];
+  ).slice(0, 5) ?? [];
 
   const overdueTasks = tasks?.filter(task => 
     task.dueDate && 
     isOverdue(task.dueDate) && 
     task.status !== "DONE"
-  ).length || 0;
+  ).length ?? 0;
 
   return (
     <>
@@ -70,7 +69,7 @@ const Dashboard: NextPage = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="truncate text-sm font-medium text-gray-500">Total Tasks</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats?.totalTasks || 0}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{stats?.totalTasks ?? 0}</dd>
                   </dl>
                 </div>
               </div>
@@ -84,7 +83,7 @@ const Dashboard: NextPage = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="truncate text-sm font-medium text-gray-500">Completed</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats?.doneTasks || 0}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{stats?.doneTasks ?? 0}</dd>
                   </dl>
                 </div>
               </div>
@@ -98,7 +97,7 @@ const Dashboard: NextPage = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="truncate text-sm font-medium text-gray-500">My Tasks</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats?.myTasks || 0}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{stats?.myTasks ?? 0}</dd>
                   </dl>
                 </div>
               </div>
@@ -136,7 +135,7 @@ const Dashboard: NextPage = () => {
               <div className="mt-5">
                 {projectsLoading ? (
                   <div className="animate-pulse space-y-4">
-                    {[...Array(3)].map((_, i) => (
+                    {Array.from({ length: 3 }, (_, i) => (
                       <div key={i} className="h-16 bg-gray-200 rounded"></div>
                     ))}
                   </div>
@@ -147,7 +146,7 @@ const Dashboard: NextPage = () => {
                         <Link href={`/projects/${project.id}`} className="flex items-center hover:bg-gray-50 -m-2 p-2 rounded">
                           <div className="flex-shrink-0">                            <div 
                               className="h-10 w-10 rounded-lg flex items-center justify-center"
-                              style={{ backgroundColor: project.color || "#3B82F6" }}
+                              style={{ backgroundColor: project.color ?? "#3B82F6" }}
                             >
                               <FolderIcon className="h-6 w-6 text-white" />
                             </div>
@@ -207,7 +206,7 @@ const Dashboard: NextPage = () => {
               <div className="mt-5">
                 {tasksLoading ? (
                   <div className="animate-pulse space-y-4">
-                    {[...Array(3)].map((_, i) => (
+                    {Array.from({ length: 3 }, (_, i) => (
                       <div key={i} className="h-16 bg-gray-200 rounded"></div>
                     ))}
                   </div>

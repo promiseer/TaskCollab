@@ -12,7 +12,7 @@ const Tasks: NextPage = () => {
   
   const { data: tasks, isLoading } = api.task.getAll.useQuery({
     assignedToMe: filter === "mine",
-    status: statusFilter === "all" ? undefined : statusFilter as any,
+    status: statusFilter === "all" ? undefined : (statusFilter as "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE"),
   });
 
   const statusOptions = [
@@ -91,7 +91,7 @@ const Tasks: NextPage = () => {
         <div className="mt-8">
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="h-24 bg-gray-200 rounded-lg"></div>
                 </div>
@@ -123,7 +123,7 @@ const Tasks: NextPage = () => {
                             <span className="flex items-center">
                               <div
                                 className="w-3 h-3 rounded-full mr-2"
-                                style={{ backgroundColor: task.project.color }}
+                                style={{ backgroundColor: task.project.color ?? "#3B82F6" }}
                               />
                               {task.project.name}
                             </span>

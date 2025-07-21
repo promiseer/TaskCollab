@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { PlusIcon, FolderIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { api } from "~/utils/api";
 import { formatRelativeTime } from "~/utils/helpers";
@@ -38,7 +39,7 @@ const Projects: NextPage = () => {
         <div className="mt-8">
           {isLoading ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="h-48 bg-gray-200 rounded-lg"></div>
                 </div>
@@ -57,7 +58,7 @@ const Projects: NextPage = () => {
                       <div className="flex items-center">
                         <div
                           className="h-12 w-12 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: project.color }}
+                          style={{ backgroundColor: project.color ?? "#3B82F6" }}
                         >
                           <FolderIcon className="h-6 w-6 text-white" />
                         </div>
@@ -95,14 +96,16 @@ const Projects: NextPage = () => {
                             className="relative h-8 w-8 rounded-full border-2 border-white"
                           >
                             {member.user.image ? (
-                              <img
+                              <Image
                                 className="h-8 w-8 rounded-full"
                                 src={member.user.image}
-                                alt={member.user.name || "User"}
+                                alt={member.user.name ?? "User"}
+                                width={32}
+                                height={32}
                               />
                             ) : (
                               <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-700">
-                                {member.user.name?.charAt(0) || "U"}
+                                {member.user.name?.charAt(0) ?? "U"}
                               </div>
                             )}
                           </div>

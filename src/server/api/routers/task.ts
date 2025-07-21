@@ -78,7 +78,18 @@ export const taskRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {};
+      const where: {
+        projectId?: string;
+        project?: {
+          members: {
+            some: {
+              userId: string;
+            };
+          };
+        };
+        status?: "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
+        assignedToId?: string;
+      } = {};
 
       if (input.projectId) {
         // Check if user is a member of the project
@@ -388,7 +399,16 @@ export const taskRouter = createTRPCRouter({
   getStats: protectedProcedure
     .input(z.object({ projectId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      const where: any = {
+      const where: {
+        projectId?: string;
+        project?: {
+          members: {
+            some: {
+              userId: string;
+            };
+          };
+        };
+      } = {
         project: {
           members: {
             some: {

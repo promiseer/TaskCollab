@@ -23,7 +23,7 @@ const EditProject: NextPage = () => {
 
   const updateProject = api.project.update.useMutation({
     onSuccess: () => {
-      router.push(`/projects/${id}`);
+      void router.push(`/projects/${id}`);
     },
     onError: (error) => {
       setErrors({ general: error.message });
@@ -34,8 +34,8 @@ const EditProject: NextPage = () => {
     if (project) {
       setFormData({
         name: project.name,
-        description: project.description || "",
-        color: project.color || "#3B82F6",
+        description: project.description ?? "",
+        color: project.color ?? "#3B82F6",
       });
     }
   }, [project]);
@@ -211,10 +211,10 @@ const EditProject: NextPage = () => {
               </Link>
               <button
                 type="submit"
-                disabled={updateProject.isLoading}
+                disabled={updateProject.isPending}
                 className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {updateProject.isLoading ? "Saving..." : "Save Changes"}
+                {updateProject.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

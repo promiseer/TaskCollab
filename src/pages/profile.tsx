@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { getInitials } from "~/utils/helpers";
@@ -24,10 +25,10 @@ const Profile: NextPage = () => {
   const handleEdit = () => {
     if (profile) {
       setFormData({
-        name: profile.name || "",
-        bio: profile.bio || "",
-        role: profile.role || "",
-        department: profile.department || "",
+        name: profile.name ?? "",
+        bio: profile.bio ?? "",
+        role: profile.role ?? "",
+        department: profile.department ?? "",
       });
     }
     setIsEditing(true);
@@ -152,10 +153,10 @@ const Profile: NextPage = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={updateProfile.isLoading}
+                    disabled={updateProfile.isPending}
                     className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50"
                   >
-                    {updateProfile.isLoading ? "Saving..." : "Save"}
+                    {updateProfile.isPending ? "Saving..." : "Save"}
                   </button>
                 </div>
               </form>
@@ -163,10 +164,12 @@ const Profile: NextPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
                   {profile.image ? (
-                    <img
+                    <Image
                       className="h-20 w-20 rounded-full"
                       src={profile.image}
-                      alt={profile.name || "User"}
+                      alt={profile.name ?? "User"}
+                      width={80}
+                      height={80}
                     />
                   ) : (
                     <div className="h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center text-xl font-medium text-gray-700">
@@ -175,7 +178,7 @@ const Profile: NextPage = () => {
                   )}
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {profile.name || "No name set"}
+                      {profile.name ?? "No name set"}
                     </h2>
                     <p className="text-sm text-gray-500">{profile.email}</p>
                     {profile.role && (

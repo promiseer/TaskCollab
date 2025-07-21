@@ -25,13 +25,13 @@ const EditTask: NextPage = () => {
   );
 
   const { data: project } = api.project.getById.useQuery(
-    { id: task?.project.id || "" },
+    { id: task?.project.id ?? "" },
     { enabled: !!task?.project.id }
   );
 
   const updateTask = api.task.update.useMutation({
     onSuccess: () => {
-      router.push(`/tasks/${id}`);
+      void router.push(`/tasks/${id}`);
     },
     onError: (error) => {
       setErrors({ general: error.message });
@@ -42,11 +42,11 @@ const EditTask: NextPage = () => {
     if (task) {
       setFormData({
         title: task.title,
-        description: task.description || "",
+        description: task.description ?? "",
         status: task.status,
         priority: task.priority,
-        assignedToId: task.assignedTo?.id || "",
-        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "",
+        assignedToId: task.assignedTo?.id ?? "",
+        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0]! : "",
       });
     }
   }, [task]);
@@ -152,7 +152,7 @@ const EditTask: NextPage = () => {
               <div className="flex items-center">
                 <div
                   className="h-8 w-8 rounded-lg flex items-center justify-center mr-3"
-                  style={{ backgroundColor: task.project.color }}
+                  style={{ backgroundColor: task.project.color ?? "#3B82F6" }}
                 >
                   <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
@@ -293,10 +293,10 @@ const EditTask: NextPage = () => {
               </Link>
               <button
                 type="submit"
-                disabled={updateTask.isLoading}
+                disabled={updateTask.isPending}
                 className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {updateTask.isLoading ? "Saving..." : "Save Changes"}
+                {updateTask.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

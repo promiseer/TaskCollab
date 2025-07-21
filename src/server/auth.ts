@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
 
           // Verify password using bcrypt
           const bcrypt = await import('bcryptjs');
-          const isValidPassword = await bcrypt.compare(credentials.password, user.role as string);
+          const isValidPassword = await bcrypt.compare(credentials.password, user.role);
           
           console.log('Password validation result:', isValidPassword);
           

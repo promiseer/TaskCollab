@@ -12,7 +12,7 @@ const NewTask: NextPage = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    projectId: projectId || "",
+    projectId: projectId ?? "",
     assignedToId: "",
     priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH" | "URGENT",
     dueDate: "",
@@ -27,7 +27,7 @@ const NewTask: NextPage = () => {
 
   const createTask = api.task.create.useMutation({
     onSuccess: (task) => {
-      router.push(`/tasks/${task.id}`);
+      void router.push(`/tasks/${task.id}`);
     },
     onError: (error) => {
       setErrors({ general: error.message });
@@ -251,10 +251,10 @@ const NewTask: NextPage = () => {
               </Link>
               <button
                 type="submit"
-                disabled={createTask.isLoading}
+                disabled={createTask.isPending}
                 className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                {createTask.isLoading ? "Creating..." : "Create Task"}
+                {createTask.isPending ? "Creating..." : "Create Task"}
               </button>
             </div>
           </form>

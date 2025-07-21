@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -18,7 +19,7 @@ import {
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { api } from "~/utils/api";
-import { formatRelativeTime, statusColors, priorityColors } from "~/utils/helpers";
+import { formatRelativeTime, priorityColors } from "~/utils/helpers";
 
 const TaskDetail: NextPage = () => {
   const router = useRouter();
@@ -32,20 +33,20 @@ const TaskDetail: NextPage = () => {
 
   const updateTaskStatus = api.task.update.useMutation({
     onSuccess: () => {
-      refetch();
+      void refetch();
     },
   });
 
   const deleteTask = api.task.delete.useMutation({
     onSuccess: () => {
-      router.push(`/projects/${task?.project.id}`);
+      void router.push(`/projects/${task?.project.id}`);
     },
   });
 
   const addComment = api.task.addComment.useMutation({
     onSuccess: () => {
       setCommentContent("");
-      refetch();
+      void refetch();
     },
   });
 
@@ -118,7 +119,7 @@ const TaskDetail: NextPage = () => {
     <>
       <Head>
         <title>{task.title} - TaskCollab</title>
-        <meta name="description" content={task.description || "Task details"} />
+        <meta name="description" content={task.description ?? "Task details"} />
       </Head>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -146,7 +147,7 @@ const TaskDetail: NextPage = () => {
                 >
                   <div
                     className="h-4 w-4 rounded mr-2"
-                    style={{ backgroundColor: task.project.color }}
+                    style={{ backgroundColor: task.project.color ?? "#3B82F6" }}
                   />
                   {task.project.name}
                 </Link>
@@ -239,10 +240,10 @@ const TaskDetail: NextPage = () => {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      disabled={!commentContent.trim() || addComment.isLoading}
+                      disabled={!commentContent.trim() || addComment.isPending}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     >
-                      {addComment.isLoading ? "Adding..." : "Add Comment"}
+                      {addComment.isPending ? "Adding..." : "Add Comment"}
                     </button>
                   </div>
                 </form>
@@ -255,14 +256,16 @@ const TaskDetail: NextPage = () => {
                     <div key={comment.id} className="p-6">
                       <div className="flex items-start space-x-3">
                         {comment.author.image ? (
-                          <img
+                          <Image
                             className="h-8 w-8 rounded-full"
                             src={comment.author.image}
-                            alt={comment.author.name || "User"}
+                            alt={comment.author.name ?? "User"}
+                            width={32}
+                            height={32}
                           />
                         ) : (
                           <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
-                            {comment.author.name?.charAt(0) || "U"}
+                            {comment.author.name?.charAt(0) ?? "U"}
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
@@ -300,7 +303,7 @@ const TaskDetail: NextPage = () => {
                   <button
                     key={status.value}
                     onClick={() => handleStatusChange(status.value)}
-                    disabled={updateTaskStatus.isLoading}
+                    disabled={updateTaskStatus.isPending}
                     className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       task.status === status.value
                         ? status.color
@@ -333,14 +336,16 @@ const TaskDetail: NextPage = () => {
                     {task.assignedTo ? (
                       <div className="flex items-center">
                         {task.assignedTo.image ? (
-                          <img
+                          <Image
                             className="h-6 w-6 rounded-full mr-2"
                             src={task.assignedTo.image}
-                            alt={task.assignedTo.name || "User"}
+                            alt={task.assignedTo.name ?? "User"}
+                            width={24}
+                            height={24}
                           />
                         ) : (
                           <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-700 mr-2">
-                            {task.assignedTo.name?.charAt(0) || "U"}
+                            {task.assignedTo.name?.charAt(0) ?? "U"}
                           </div>
                         )}
                         {task.assignedTo.name}
@@ -399,7 +404,7 @@ const TaskDetail: NextPage = () => {
               >
                 <div
                   className="h-8 w-8 rounded-lg flex items-center justify-center mr-3"
-                  style={{ backgroundColor: task.project.color }}
+                  style={{ backgroundColor: task.project.color ?? "#3B82F6" }}
                 >
                   <FolderIcon className="h-4 w-4 text-white" />
                 </div>

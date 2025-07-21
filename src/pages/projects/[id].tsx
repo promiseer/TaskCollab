@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
@@ -20,7 +21,7 @@ import {
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { api } from "~/utils/api";
-import { formatRelativeTime, statusColors, priorityColors } from "~/utils/helpers";
+import { formatRelativeTime, priorityColors } from "~/utils/helpers";
 
 const ProjectDetail: NextPage = () => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const ProjectDetail: NextPage = () => {
 
   const deleteProject = api.project.delete.useMutation({
     onSuccess: () => {
-      router.push("/projects");
+      void router.push("/projects");
     },
   });
 
@@ -70,15 +71,6 @@ const ProjectDetail: NextPage = () => {
   const canEdit = userRole === "OWNER" || userRole === "ADMIN";
   const canDelete = userRole === "OWNER";
 
-  const handleAddMember = () => {
-    if (!newMemberEmail.trim()) return;
-    
-    addMember.mutate({
-      projectId: project!.id,
-      email: newMemberEmail.trim(),
-      role: newMemberRole,
-    });
-  };
   const filteredTasks = project?.tasks.filter((task) => {
     if (filter === "mine") {
       return task.assignedTo?.id === session?.user?.id;
@@ -87,11 +79,11 @@ const ProjectDetail: NextPage = () => {
   });
 
   const taskStats = {
-    total: project?.tasks.length || 0,
-    todo: project?.tasks.filter((t) => t.status === "TODO").length || 0,
-    inProgress: project?.tasks.filter((t) => t.status === "IN_PROGRESS").length || 0,
-    inReview: project?.tasks.filter((t) => t.status === "IN_REVIEW").length || 0,
-    done: project?.tasks.filter((t) => t.status === "DONE").length || 0,
+    total: project?.tasks.length ?? 0,
+    todo: project?.tasks.filter((t) => t.status === "TODO").length ?? 0,
+    inProgress: project?.tasks.filter((t) => t.status === "IN_PROGRESS").length ?? 0,
+    inReview: project?.tasks.filter((t) => t.status === "IN_REVIEW").length ?? 0,
+    done: project?.tasks.filter((t) => t.status === "DONE").length ?? 0,
   };
 
   const handleDelete = () => {
@@ -128,7 +120,7 @@ const ProjectDetail: NextPage = () => {
     <>
       <Head>
         <title>{project.name} - TaskCollab</title>
-        <meta name="description" content={project.description || "Project details"} />
+        <meta name="description" content={project.description ?? "Project details"} />
       </Head>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -144,7 +136,7 @@ const ProjectDetail: NextPage = () => {
             <div className="min-w-0 flex-1 flex items-center">
               <div
                 className="h-12 w-12 rounded-lg flex items-center justify-center mr-4"
-                style={{ backgroundColor: project.color }}
+                style={{ backgroundColor: project.color ?? "#3B82F6" }}
               >
                 <FolderIcon className="h-6 w-6 text-white" />
               </div>
@@ -159,7 +151,7 @@ const ProjectDetail: NextPage = () => {
                 {process.env.NODE_ENV === 'development' && (
                   <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
                     <div>Current user ID: {session?.user?.id}</div>
-                    <div>User role: {userRole || 'None'}</div>
+                    <div>User role: {userRole ?? 'None'}</div>
                     <div>Can edit: {canEdit ? 'Yes' : 'No'}</div>
                     <div>Members: {project.members.map(m => `${m.user.name} (${m.role})`).join(', ')}</div>
                   </div>
@@ -406,10 +398,10 @@ const ProjectDetail: NextPage = () => {
                             role: newMemberRole,
                           });
                         }}
-                        disabled={!newMemberEmail || addMember.isLoading}
+                        disabled={!newMemberEmail || addMember.isPending}
                         className="flex-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {addMember.isLoading ? 'Adding...' : 'Add Member'}
+                        {addMember.isPending ? 'Adding...' : 'Add Member'}
                       </button>
                       <button
                         onClick={() => setShowAddMember(false)}
@@ -427,14 +419,16 @@ const ProjectDetail: NextPage = () => {
                   <div key={member.id} className="flex items-center justify-between">
                     <div className="flex items-center">
                       {member.user.image ? (
-                        <img
+                        <Image
                           className="h-8 w-8 rounded-full"
                           src={member.user.image}
-                          alt={member.user.name || "User"}
+                          alt={member.user.name ?? "User"}
+                          width={32}
+                          height={32}
                         />
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
-                          {member.user.name?.charAt(0) || "U"}
+                          {member.user.name?.charAt(0) ?? "U"}
                         </div>
                       )}
                       <div className="ml-3 min-w-0 flex-1">

@@ -63,6 +63,9 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().optional(),
+        bio: z.string().optional(),
+        role: z.string().optional(),
+        department: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -70,6 +73,9 @@ export const userRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
         data: {
           name: input.name,
+          bio: input.bio,
+          role: input.role,
+          department: input.department,
         },
       });
     }),  getProfile: protectedProcedure.query(async ({ ctx }) => {
@@ -81,6 +87,17 @@ export const userRouter = createTRPCRouter({
         email: true,
         image: true,
         emailVerified: true,
+        bio: true,
+        role: true,
+        department: true,
+        _count: {
+          select: {
+            createdProjects: true,
+            projectMemberships: true,
+            createdTasks: true,
+            assignedTasks: true,
+          },
+        },
       },
     });
 
@@ -88,16 +105,7 @@ export const userRouter = createTRPCRouter({
       throw new Error("User not found");
     }
 
-    // Return user with empty counts for now to avoid errors
-    return {
-      ...user,
-      _count: {
-        createdProjects: 0,
-        projectMemberships: 0,
-        createdTasks: 0,
-        assignedTasks: 0,
-      },
-    };
+    return user;
   }),
 
   searchUsers: protectedProcedure

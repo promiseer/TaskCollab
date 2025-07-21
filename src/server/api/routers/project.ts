@@ -3,6 +3,24 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { TRPCError } from "@trpc/server";
+import { type PrismaClient } from "@prisma/client";
+
+// Utility function to validate user exists
+async function validateUserExists(db: PrismaClient, userId: string) {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: `User with ID ${userId} not found. Please log out and log back in.`,
+    });
+  }
+
+  return user;
+}
 
 export const projectRouter = createTRPCRouter({
   create: protectedProcedure
@@ -14,6 +32,9 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Validate that the user exists in the database
+      await validateUserExists(ctx.db, ctx.session.user.id);
+
       const project = await ctx.db.project.create({
         data: {
           name: input.name,
