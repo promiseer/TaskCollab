@@ -5,7 +5,9 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
+import { env } from "~/env";
 import { db } from "~/server/db";
 
 /**
@@ -44,6 +46,37 @@ export const authOptions: NextAuthOptions = {
     error: '/login', // Error code passed in query string as ?error=
   },
   callbacks: {
+    signIn: async ({ user, account }) => {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      if (!user.email) {
+        return false;
+      }
+
+      try {
+        const databaseUser = await db.user.upsert({
+          where: { email: user.email },
+          update: {
+            name: user.name,
+            image: user.image,
+          },
+          create: {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            emailVerified: new Date(),
+          },
+        });
+
+        user.id = databaseUser.id;
+        return true;
+      } catch (error) {
+        console.error("Unable to provision Google user:", error);
+        return "/login?error=DatabaseUnavailable";
+      }
+    },
     session: ({ session, token }) => ({
       ...session,
       user: {
@@ -59,6 +92,14 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {

@@ -63,6 +63,8 @@ NEXTAUTH_SECRET="your-nextauth-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
 
 # OAuth Providers (Optional)
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
 DISCORD_CLIENT_ID=""
 DISCORD_CLIENT_SECRET=""
 
